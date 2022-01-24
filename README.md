@@ -1,6 +1,6 @@
 # LazyBookworm
 
-[![Issues](https://img.shields.io/bitbucket/issues/Locxion/LazyBookWorm)](https://github.com/Locxion/LazyBookworm/issues)
+[![Issues](https://img.shields.io/github/issues/Locxion/LazyBookWorm)](https://github.com/Locxion/LazyBookworm/issues)
 
 LazyBookWorm is a little Side-Project build with Materials Design and EntityFramework on 
 
