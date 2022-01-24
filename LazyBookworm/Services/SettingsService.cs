@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using LazyBookworm.Models;
-using LazyBookworm.Models.Common;
+﻿using LazyBookworm.Models.Common;
 using log4net;
 using Newtonsoft.Json;
+using System;
+using System.IO;
 
 namespace LazyBookworm.Services
 {

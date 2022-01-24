@@ -1,18 +1,17 @@
-﻿using System;
-using System.IO;
-using System.Reflection.Metadata;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Input;
-using LazyBookworm.Models;
+﻿using LazyBookworm.Common.Enums;
+using LazyBookworm.Common.Models;
+using LazyBookworm.Common.Models.Common;
+using LazyBookworm.Database;
 using LazyBookworm.Models.Common;
 using LazyBookworm.Services;
 using log4net;
 using log4net.Config;
-using log4net.Core;
-using log4net.Repository.Hierarchy;
 using MaterialDesignThemes.Wpf;
-using Newtonsoft.Json.Linq;
+using System;
+using System.IO;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Input;
 
 namespace LazyBookworm.Windows
 {
@@ -23,7 +22,6 @@ namespace LazyBookworm.Windows
     {
         private readonly ILog _logger = LogManager.GetLogger(typeof(MainWindow));
 
-        private readonly SnackbarMessageQueue _snackbarMessageQueue = new(new TimeSpan(0, 0, 5));
         public readonly Settings Settings;
 
         public MainWindow()
@@ -51,6 +49,35 @@ namespace LazyBookworm.Windows
         }
 
         #endregion Settings Tab
+
+        #region Users Tab
+
+        private void AddUser_Button_OnClick(object sender, RoutedEventArgs e)
+        {
+            //TODO Nullchecks
+
+            var loginDetails = new LoginDetails(UserLogin_TextBox.Text, UserPassword_PasswordBox.Password);
+            var personDetails = new Person()
+            {
+                Name = UserName_TextBox.Text,
+                Forename = UserForename_TextBox.Text
+            };
+            var newUser = new UserAccount()
+            {
+                LoginDetails = loginDetails,
+                AccountCreation = DateTime.UtcNow,
+                PersonDetails = personDetails,
+                LastLogin = DateTime.MinValue,
+                PermissionLevel = Enum.Parse<PermissionLevel>(UserPermissions_Combobox.SelectedItem.ToString())
+            };
+
+            if (UserService.CreateUser(newUser, new LazyBookWormContext()) > 0)
+            {
+                ShowSnackbar("User Created!");
+            }
+        }
+
+        #endregion
 
         #region General
 

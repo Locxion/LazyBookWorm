@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using LazyBookworm.Common.Enums;
-using LazyBookworm.Common.Models;
+﻿using LazyBookworm.Common.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System;
 
 namespace LazyBookworm.Database.Configurations
 {
