@@ -18,8 +18,13 @@ namespace LazyBookworm.Database
         public LazyBookWormContext CreateDbContext(string[] args)
         {
             var builder = new ConfigurationBuilder();
+#if DEBUG
+            var connectionString = $"Host=localhost;Port=3306;Database=LazyBookworm;Username=test;Password=test;Convert Zero Datetime=True";
 
-            var connectionString = $"Host={Settings.DatabaseHost};Port=3306;Database={Settings.DatabaseName};Username={Settings.DatabaseUser};Password={Settings.DatabasePassword};Convert Zero Datetime=True";
+#endif
+#if RELEASE
+            var connectionString = $"Host={Settings.DatabaseSettings.DatabaseHost};Port=3306;Database={Settings.DatabaseSettings.DatabaseName};Username={Settings.DatabaseSettings.DatabaseUser};Password={Settings.DatabaseSettings.DatabasePassword};Convert Zero Datetime=True";
+#endif
 
             var optionsBuilder = new DbContextOptionsBuilder<LazyBookWormContext>().UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 

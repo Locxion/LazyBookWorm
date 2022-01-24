@@ -46,16 +46,18 @@ namespace LazyBookworm.Services
         /// Saves Settings to File
         /// </summary>
         /// <param name="settings"></param>
-        public static void SaveSettings(Settings settings)
+        public static bool SaveSettings(Settings settings)
         {
             try
             {
                 File.WriteAllText(Constants.SETTINGS_PATH, JsonConvert.SerializeObject(settings, Formatting.Indented));
+                return true;
             }
             catch (Exception ex)
             {
                 _logger.Error("Could not write to Settings File!");
                 _logger.Error(ex.Message);
+                return false;
             }
         }
     }

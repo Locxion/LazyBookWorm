@@ -3,9 +3,119 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:local="clr-namespace:LazyBookworm"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="800" WindowStyle="None"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="13"
+        TextOptions.TextFormattingMode="Ideal"
+        TextOptions.TextRenderingMode="Auto"
+        Background="{DynamicResource MaterialDesignPaper}"
+        FontFamily="{DynamicResource MaterialDesignFont}">
     <Grid>
+        <materialDesign:Card x:Name="TitleBar" HorizontalAlignment="Stretch" Margin="2,2,2,2" VerticalAlignment="Top" Padding="5,5,5,5" Background="#FF8D8D8D" MouseDown="TitleBar_MouseDown">
+            <Grid>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                    <Label VerticalAlignment="Center" Content="{materialDesign:PackIcon BookCogOutline}" FontSize="18" />
+                    <Label FontSize="18">LazyBookWorm</Label>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button
+                            x:Name="AppMinimizeButton"
+                            Content="{materialDesign:PackIcon WindowMinimize}"
+                            ToolTip="Icon"
+                            IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="2,0,2,0" Click="AppMinimizeButton_Click" />
+                    <Button
+                            x:Name="AppMaximizeButton"
+                            Content="{materialDesign:PackIcon WindowMaximize}"
+                            ToolTip="Icon"
+                            IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="2,0,2,0" Click="AppMaximizeButton_Click" />
+                    <Button
+                            x:Name="AppCloseButton"
+                            Content="{materialDesign:PackIcon Close}"
+                            ToolTip="Icon"
+                            IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="2,0,2,0" Click="AppCloseButton_Click" />
+                </StackPanel>
+            </Grid>
+        </materialDesign:Card>
+        <TabControl VerticalContentAlignment="Center"
+            Style="{StaticResource MaterialDesignNavigatilRailTabControl}"
+            materialDesign:ColorZoneAssist.Mode="PrimaryMid" Margin="2,45,2,2">
+            <TabItem x:Name="Overview">
+                <TabItem.Header>
+                    <StackPanel Height="auto" Width="auto">
+                        <materialDesign:PackIcon
+                            Kind="Overboard"
+                             Width="24"
+                             Height="24"
+                             HorizontalAlignment="Center" />
+                        <TextBlock
+                            Text="Overview"
+                            HorizontalAlignment="Center" />
+                    </StackPanel>
+                </TabItem.Header>
+                <Grid>
+                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center">TODO</TextBlock>
+                </Grid>
+            </TabItem>
+            <TabItem x:Name="SettingsTab">
+                <TabItem.Header>
+                    <StackPanel Height="auto" Width="auto">
+                        <materialDesign:PackIcon Kind="Settings"
+                              Width="24"
+                              Height="24"
+                              HorizontalAlignment="Center" />
+                        <TextBlock
+                              Text="Settings"
+                              HorizontalAlignment="Center" />
+                    </StackPanel>
+                </TabItem.Header>
+                <Grid>
+                    <StackPanel>
+                        <Label
+                            x:Name="DatabaseCredentialsTitle"
+                            Content="Databse Credentials:"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Margin="10,5,0,0"
+                            Padding="1,0,2,0"
+                            VerticalContentAlignment="Center"
+                            BorderThickness="0,0,0,0"
+                            FontSize="16" />
+                        <TextBox
+                            x:Name="ServerAdress_TextBox"
+                            materialDesign:HintAssist.Hint="Host Adress:"
+                            Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                            VerticalAlignment="Center" HorizontalAlignment="Left" Padding="2,4,2,4" Width="200" Margin="10,0,0,0" />
+                        <TextBox
+                            x:Name="DatabseName_TextBox"
+                            materialDesign:HintAssist.Hint="Database Name:"
+                            Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                            VerticalAlignment="Center" HorizontalAlignment="Left" Padding="2,4,2,4" Width="200" Margin="10,0,0,0" />
+                        <TextBox
+                            x:Name="DatabseUser_TextBox"
+                            materialDesign:HintAssist.Hint="Database User:"
+                            Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                            VerticalAlignment="Center" HorizontalAlignment="Left" Padding="2,4,2,4" Width="200" Margin="10,0,0,0" />
+                        <PasswordBox
+                            x:Name="DatabasePassword_PasswordBox"
+                            materialDesign:HintAssist.Hint="Database Password:"
+                            materialDesign:HintAssist.Foreground="Green"
+                            materialDesign:TextFieldAssist.UnderlineBrush="Green"
+                            Style="{StaticResource MaterialDesignFloatingHintPasswordBox}" HorizontalAlignment="Left" VerticalAlignment="Center"
+                            Padding="2,4,2,4" Width="200" Margin="10,0,0,0" Height="36.1492122395833" />
+                        <Button x:Name="SaveSettings_Button"
+                            Style="{StaticResource MaterialDesignRaisedButton}"
+                            ToolTip="Resource name: MaterialDesignRaisedButton"
+                            Content="Save"
+                            IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}" HorizontalAlignment="Center" Click="SaveSettings_Button_Click" />
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+        </TabControl>
+        <materialDesign:Snackbar x:Name="Snackbar" MessageQueue="{materialDesign:MessageQueue}">
+        </materialDesign:Snackbar>
     </Grid>
 </Window>
