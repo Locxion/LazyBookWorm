@@ -11,6 +11,7 @@ namespace LazyBookworm.Common.Models.Common
         public Gender Gender { get; set; }
         public DateTime BirthDate { get; set; }
         public string Address { get; set; }
+        public string Country { get; set; }
         public MailAddress MailAddress { get; set; }
         public string Phone { get; set; }
         public string Notes { get; set; }
