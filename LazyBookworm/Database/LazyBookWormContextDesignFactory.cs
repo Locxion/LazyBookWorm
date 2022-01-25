@@ -17,7 +17,6 @@ namespace LazyBookworm.Database
 
         public LazyBookWormContext CreateDbContext(string[] args)
         {
-            var builder = new ConfigurationBuilder();
 #if DEBUG
             var connectionString = $"Host=localhost;Port=3306;Database=LazyBookworm;Username=root;Password=;Convert Zero Datetime=True";
 #endif

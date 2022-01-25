@@ -59,7 +59,7 @@
                     <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center">TODO</TextBlock>
                 </Grid>
             </TabItem>
-            <TabItem x:Name="UserTab">
+            <TabItem x:Name="UserTab" GotFocus="UserTab_GotFocus">
                 <TabItem.Header>
                     <StackPanel Height="auto" Width="auto">
                         <materialDesign:PackIcon
@@ -72,7 +72,7 @@
                             HorizontalAlignment="Center" />
                     </StackPanel>
                 </TabItem.Header>
-                <materialDesign:DialogHost x:Name="CreateUser_DialogHost">
+                <materialDesign:DialogHost x:Name="CreateUser_DialogHost" Identifier="CreateUser_DialogHost">
                     <materialDesign:DialogHost.DialogContent>
                         <StackPanel>
                             <Label Content="Create User" HorizontalContentAlignment="Center" Margin="0,5,0,0" />
@@ -132,20 +132,21 @@
                             <ColumnDefinition />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <ListView HorizontalAlignment="Stretch">
+                        <ListView x:Name="Users_Listview" HorizontalAlignment="Stretch">
                             <ListView.View>
                                 <GridView>
                                     <GridViewColumn
-                                    DisplayMemberBinding="{Binding Name}"
+                                    DisplayMemberBinding="{Binding PersonDetails.Name}"
                                     Header="Name" />
                                     <GridViewColumn
-                                    DisplayMemberBinding="{Binding Forename}"
+                                    DisplayMemberBinding="{Binding PersonDetails.Forename}"
                                     Header="Forename" />
                                     <GridViewColumn
-                                    DisplayMemberBinding="{Binding LastLogin}"
+                                    DisplayMemberBinding="{Binding PersonDetails.LastLogin}"
                                     Header="LastLogin" />
                                     <GridViewColumn
-                                    Header="Permissions">
+                                    Header="Permissions"
+                                    DisplayMemberBinding="{Binding PermissionLevel}">
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
                                                 <ComboBox
@@ -170,10 +171,25 @@
                             Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
                             HorizontalAlignment="Left"
                             ToolTip="MaterialDesignFloatingActionMiniButton"
-                            IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"
                             Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}" Margin="2,10,2,2">
                                 <materialDesign:PackIcon
                                 Kind="UserAdd" />
+                            </Button>
+                            <Button x:Name="EditUser_Button"
+                                    Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
+                                    HorizontalAlignment="Left"
+                                    ToolTip="MaterialDesignFloatingActionMiniButton"
+                                    Margin="2,10,2,2">
+                                <materialDesign:PackIcon
+                                    Kind="UserEdit" />
+                            </Button>
+                            <Button x:Name="DeleteUser_Button"
+                                    Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
+                                    HorizontalAlignment="Left"
+                                    ToolTip="MaterialDesignFloatingActionMiniButton"
+                                    Margin="2,10,2,2" Click="DeleteUser_Button_Click">
+                                <materialDesign:PackIcon
+                                    Kind="UserRemove" />
                             </Button>
                         </StackPanel>
                     </Grid>

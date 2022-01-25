@@ -22,11 +22,21 @@ namespace LazyBookworm.Windows
     {
         private readonly ILog _logger = LogManager.GetLogger(typeof(MainWindow));
 
+        public readonly LazyBookWormContext _context;
+        public readonly UserService UserService;
+
         public readonly Settings Settings;
 
         public MainWindow()
         {
-            Setup();
+            // Initialize Database Context
+            _context = new LazyBookWormContextDesignFactory().CreateDbContext(null);
+            // Initialize Services
+            UserService = new UserService(_context);
+
+            SetupLogger();
+
+            //Load Settings
             Settings = SettingsService.LoadSettings();
 
             _logger.Info($"Start Program - Version: {typeof(MainWindow).Assembly.GetName().Version}");
@@ -52,7 +62,12 @@ namespace LazyBookworm.Windows
 
         #region Users Tab
 
-        private void AddUser_Button_OnClick(object sender, RoutedEventArgs e)
+        private async void UserTab_GotFocus(object sender, RoutedEventArgs e)
+        {
+            await RefreshUserList();
+        }
+
+        private async void AddUser_Button_OnClick(object sender, RoutedEventArgs e)
         {
             //TODO Nullchecks
 
@@ -71,13 +86,51 @@ namespace LazyBookworm.Windows
                 PermissionLevel = Enum.Parse<PermissionLevel>(UserPermissions_Combobox.SelectedItem.ToString())
             };
 
-            if (UserService.CreateUser(newUser, new LazyBookWormContext()) > 0)
+            if (await UserService.CreateUserAsync(newUser) > 0)
             {
                 ShowSnackbar("User Created!");
             }
+
+            await RefreshUserList();
         }
 
-        #endregion
+        private async Task RefreshUserList()
+        {
+            Users_Listview.Items.Clear();
+            var users = await UserService.GetAllAsync();
+            Users_Listview.ItemsSource = users;
+        }
+
+        private async void DeleteUser_Button_Click(object sender, RoutedEventArgs e)
+        {
+            if (Users_Listview.SelectedItem == null)
+            {
+                ShowSnackbar("Please select a User from the List!");
+                return;
+            }
+
+            var selectedIndex = Users_Listview.SelectedIndex;
+            var users = await UserService.GetAllAsync();
+
+            var selectedUser = users[selectedIndex];
+
+            bool? result =
+                new MessageBoxCustom(
+                    $"Do you really want to Delete the User {selectedUser.PersonDetails.Name}, {selectedUser.PersonDetails.Forename} - {selectedUser.PermissionLevel}",
+                    MessageType.Confirmation, MessageButtons.YesNo).ShowDialog();
+            if (result == null || !result.Value)
+            {
+                return;
+            }
+
+            if (await UserService.DeleteUserAsync(selectedUser) > 0)
+            {
+                ShowSnackbar("User was deleted.");
+                await RefreshUserList();
+            }
+        }
+
+        #endregion Users Tab
 
         #region General
 
@@ -85,6 +138,19 @@ namespace LazyBookworm.Windows
         {
             if (e.ChangedButton == MouseButton.Left)
                 this.DragMove();
+        }
+
+        /// <summary>
+        /// Shows a Snackbar at the bottom of the Screen
+        /// </summary>
+        /// <param name="message"></param>
+        public void ShowSnackbar(string message)
+        {
+            //TODO Add ActionButton
+            if (Snackbar.MessageQueue is { } messageQueue)
+            {
+                Task.Factory.StartNew(() => messageQueue.Enqueue(message));
+            }
         }
 
         #endregion General
@@ -149,7 +215,7 @@ namespace LazyBookworm.Windows
         /// <summary>
         /// Sets Parameters for Logger etc ...
         /// </summary>
-        private void Setup()
+        private void SetupLogger()
         {
             // Initialize Logger
             var logFileName = Constants.LOG_PATH;
@@ -162,25 +228,12 @@ namespace LazyBookworm.Windows
             // appender.OnMessageLogged += Logger_OnAppenderMessage;
             // ((IAppenderAttachable)((Hierarchy)LogManager.GetRepository()).Root).AddAppender(appender);
 
-            // Setup Unhandled Exception Catch
+            // SetupLogger Unhandled Exception Catch
             AppDomain.CurrentDomain.UnhandledException += (o, args) =>
             {
                 _logger.Error($"Exception terminated Program: {args.IsTerminating}");
                 _logger.Error(args.ExceptionObject);
             };
-        }
-
-        /// <summary>
-        /// Shows a Snackbar at the bottom of the Screen
-        /// </summary>
-        /// <param name="message"></param>
-        public void ShowSnackbar(string message)
-        {
-            //TODO Add ActionButton
-            if (Snackbar.MessageQueue is { } messageQueue)
-            {
-                Task.Factory.StartNew(() => messageQueue.Enqueue(message));
-            }
         }
 
         #endregion Helper
