@@ -138,7 +138,7 @@ namespace LazyBookworm.Windows
                 return;
             }
 
-            var deleteResult = _userService.DeleteUserAsync(selectedUser);
+            var deleteResult = _userService.DeleteUser(selectedUser);
             if (!deleteResult.IsSuccess)
             {
                 ShowSnackbar(deleteResult.Message);

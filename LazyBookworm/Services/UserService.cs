@@ -53,7 +53,7 @@ namespace LazyBookworm.Services
         /// </summary>
         /// <param name="userAccount"></param>
         /// <returns></returns>
-        public ActionResult<UserAccount> DeleteUserAsync(UserAccount userAccount)
+        public ActionResult<UserAccount> DeleteUser(UserAccount userAccount)
         {
             _context.Accounts.Remove(userAccount);
 
@@ -77,32 +77,26 @@ namespace LazyBookworm.Services
         /// <returns></returns>
         public ActionResult<UserAccount> DeleteUserA(Guid id)
         {
-            var account = GetAccount(id);
-            if (account == null)
-                return ActionResult<UserAccount>.Error("User Account not found!");
-            _context.Accounts.Remove(account);
+            var getResult = GetAccount(id);
+            if (!getResult.IsSuccess)
+                return getResult;
 
-            try
-            {
-                _context.SaveChanges();
-
-                return ActionResult<UserAccount>.Success(account);
-            }
-            catch (Exception e)
-            {
-                _logger.Error(e);
-                return ActionResult<UserAccount>.SystemError("There was an Database Error!", $"{e.Message}: {e.InnerException?.Message}");
-            }
+            return DeleteUser(getResult.Result);
         }
 
         /// <summary>
         /// Gets UserAccount for given Id
         /// </summary>
         /// <param name="Id"></param>
-        /// <returns>UserAccount</returns>
-        public UserAccount GetAccount(Guid id)
+        /// <returns></returns>
+        public ActionResult<UserAccount> GetAccount(Guid Id)
         {
-            return _context.Accounts.AsQueryable().FirstOrDefault(x => x.ID == id);
+            var account = _context.Accounts.AsQueryable().FirstOrDefault(x => x.ID == Id);
+            if (account != null)
+            {
+                return ActionResult<UserAccount>.Success(account);
+            }
+            return ActionResult<UserAccount>.Error($"User Account with the ID: {Id} not found!");
         }
     }
 }
