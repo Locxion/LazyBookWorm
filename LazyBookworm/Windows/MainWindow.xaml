@@ -59,7 +59,8 @@
                     <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center">TODO</TextBlock>
                 </Grid>
             </TabItem>
-            <TabItem x:Name="UserTab" GotFocus="UserTab_GotFocus">
+            <TabItem x:Name="UserTab"
+                     GotFocus="UserTab_GotFocus">
                 <TabItem.Header>
                     <StackPanel Height="auto" Width="auto">
                         <materialDesign:PackIcon
@@ -76,32 +77,21 @@
                     <materialDesign:DialogHost.DialogContent>
                         <StackPanel>
                             <Label Content="Create User" HorizontalContentAlignment="Center" Margin="0,5,0,0" />
-                            <TextBox
-                                x:Name="UserLogin_TextBox"
+                            <TextBox x:Name="UserLogin_TextBox"
                                 materialDesign:HintAssist.Hint="Username:"
                                 Style="{StaticResource MaterialDesignFloatingHintTextBox}"
-                                VerticalAlignment="Center" HorizontalAlignment="Left" Width="200" Margin="10,2,5,2" />
-                            <PasswordBox
-                                x:Name="UserPassword_PasswordBox"
+                                VerticalAlignment="Center" HorizontalAlignment="Left" Width="200" Margin="10,2,10,2" />
+                            <PasswordBox x:Name="UserPassword_PasswordBox"
                                 materialDesign:HintAssist.Hint="Password:"
-                                materialDesign:HintAssist.Foreground="Green"
-                                materialDesign:TextFieldAssist.UnderlineBrush="Green"
                                 Style="{StaticResource MaterialDesignFloatingHintPasswordBox}" HorizontalAlignment="Left" VerticalAlignment="Center"
-                                Width="200" Margin="10,2,5,2" />
-                            <TextBox
-                                x:Name="UserName_TextBox"
-                                materialDesign:HintAssist.Hint="Name:"
-                                Style="{StaticResource MaterialDesignFloatingHintTextBox}"
-                                VerticalAlignment="Center" HorizontalAlignment="Left" Width="200" Margin="10,2,5,2" />
-                            <TextBox
-                                x:Name="UserForename_TextBox"
-                                materialDesign:HintAssist.Hint="Forename:"
-                                Style="{StaticResource MaterialDesignFloatingHintTextBox}"
-                                VerticalAlignment="Center" HorizontalAlignment="Left" Width="200" Margin="10,2,5,2" />
-                            <ComboBox
-                                x:Name="UserPermissions_Combobox"
+                                Width="200" Margin="10,2,10,2" />
+                            <PasswordBox x:Name="UserPasswordConfirm_PasswordBox"
+                                materialDesign:HintAssist.Hint="Confirm Password:"
+                                Style="{StaticResource MaterialDesignFloatingHintPasswordBox}" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                Width="200" Margin="10,2,10,2" />
+                            <ComboBox x:Name="UserPermissions_Combobox"
                                 materialDesign:HintAssist.Hint="Permissions:"
-                                VerticalAlignment="Center" Margin="10,2,5,2">
+                                VerticalAlignment="Center" Margin="10,2,10,2">
                                 <ComboBoxItem
                                     Content="User" />
                                 <ComboBoxItem
@@ -111,6 +101,57 @@
                                 <ComboBoxItem
                                     Content="Developer" />
                             </ComboBox>
+                            <TextBox x:Name="UserName_TextBox"
+                                materialDesign:HintAssist.Hint="Name:"
+                                Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                                VerticalAlignment="Center" HorizontalAlignment="Left" Width="200" Margin="10,2,10,2" />
+                            <TextBox x:Name="UserForename_TextBox"
+                                materialDesign:HintAssist.Hint="Forename:"
+                                Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                                VerticalAlignment="Center" HorizontalAlignment="Left" Width="200" Margin="10,2,10,2" />
+                            <TextBox x:Name="UserEmail_TextBox"
+                                     materialDesign:HintAssist.Hint="E-Mail:"
+                                     Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                                     VerticalAlignment="Center" HorizontalAlignment="Left" Width="200" Margin="10,2,10,2" />
+                            <TextBox x:Name="UserPhone_TextBox"
+                                     materialDesign:HintAssist.Hint="Phone:"
+                                     Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                                     VerticalAlignment="Center" HorizontalAlignment="Left" Width="200" Margin="10,2,10,2" />
+                            <ComboBox x:Name="UserGender_Combobox"
+                                materialDesign:HintAssist.Hint="Gender:"
+                                VerticalAlignment="Center" Margin="10,2,10,2">
+                                <ComboBoxItem
+                                    Content="Male" />
+                                <ComboBoxItem
+                                    Content="Female" />
+                                <ComboBoxItem
+                                    Content="Other" />
+                            </ComboBox>
+                            <DatePicker x:Name="UserBirthDay_DatePicker"
+                                VerticalAlignment="Center" Margin="10,2,10,2"
+                                materialDesign:HintAssist.Hint="Birthday:"
+                                materialDesign:TextFieldAssist.HasClearButton="True"
+                                Style="{StaticResource MaterialDesignFloatingHintDatePicker}" />
+                            <TextBox x:Name="UserAddress_TextBox"
+                            VerticalAlignment="Center" Margin="10,2,10,2"
+                            Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                            Height="100"
+                            AcceptsReturn="True"
+                            TextWrapping="Wrap"
+                            VerticalScrollBarVisibility="Auto"
+                            materialDesign:HintAssist.Hint="Address:" />
+                            <TextBox x:Name="UserCountry_TextBox"
+                                     materialDesign:HintAssist.Hint="Country:"
+                                     Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                                     VerticalAlignment="Center" HorizontalAlignment="Left" Width="200" Margin="10,2,10,2" />
+                            <TextBox x:Name="UserNotes_TextBox"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                     VerticalAlignment="Center" Margin="10,2,10,2"
+                                     Height="200"
+                                     AcceptsReturn="True"
+                                     TextWrapping="Wrap"
+                                     VerticalScrollBarVisibility="Auto"
+                                     materialDesign:HintAssist.Hint="Notes:" />
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                 <Button x:Name="AddUser_Button"
                                     Style="{StaticResource MaterialDesignRaisedButton}"
@@ -132,7 +173,19 @@
                             <ColumnDefinition />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <ListView x:Name="Users_Listview" HorizontalAlignment="Stretch">
+                        <DataGrid x:Name="UserAccounts_DataGrid"
+                            Margin="2,10,2,2"
+                            materialDesign:DataGridAssist.CellPadding="4 2 4 2"
+                            materialDesign:DataGridAssist.ColumnHeaderPadding="4 2 4 2"
+                            IsReadOnly="true"
+                            CanUserSortColumns="True"
+                            CanUserAddRows="True"
+                            SelectionUnit="FullRow"
+                            SelectionMode="Single">
+                        </DataGrid>
+                        <!--<ListView x:Name="Users_Listview"
+                                  HorizontalAlignment="Stretch"
+                                  Style="{StaticResource MaterialDesignListView}">
                             <ListView.View>
                                 <GridView>
                                     <GridViewColumn
@@ -165,7 +218,7 @@
                                     </GridViewColumn>
                                 </GridView>
                             </ListView.View>
-                        </ListView>
+                        </ListView>-->
                         <StackPanel Grid.Column="1">
                             <Button x:Name="AddNewUser_Button"
                             Style="{StaticResource MaterialDesignFloatingActionMiniButton}"

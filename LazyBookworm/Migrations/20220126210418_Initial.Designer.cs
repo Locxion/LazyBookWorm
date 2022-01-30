@@ -3,16 +3,18 @@ using System;
 using LazyBookworm.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace LazyBookworm.Database.Migrations
+namespace LazyBookworm.Migrations
 {
     [DbContext(typeof(LazyBookWormContext))]
-    partial class LazyBookWormContextModelSnapshot : ModelSnapshot
+    [Migration("20220126210418_Initial")]
+    partial class Initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,18 +30,50 @@ namespace LazyBookworm.Database.Migrations
                     b.Property<DateTime>("AccountCreation")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasDefaultValue(new DateTime(2022, 1, 24, 14, 58, 9, 502, DateTimeKind.Utc).AddTicks(3750));
+                        .HasDefaultValue(new DateTime(2022, 1, 26, 21, 4, 18, 733, DateTimeKind.Utc).AddTicks(6284));
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("BirthDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Country")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Forename")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("Gender")
+                        .HasColumnType("int");
 
                     b.Property<bool>("IsSuspended")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<DateTime>("LastLogin")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime(6)")
-                        .HasDefaultValue(new DateTime(2022, 1, 24, 14, 58, 9, 502, DateTimeKind.Utc).AddTicks(3520));
+                    b.Property<DateTime?>("LastLogin")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("MailAddress")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<int>("PermissionLevel")
                         .HasColumnType("int");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.HasKey("ID");
 
@@ -70,49 +104,7 @@ namespace LazyBookworm.Database.Migrations
                                 .HasForeignKey("UserAccountID");
                         });
 
-                    b.OwnsOne("LazyBookworm.Common.Models.Common.Person", "PersonDetails", b1 =>
-                        {
-                            b1.Property<Guid>("UserAccountID")
-                                .HasColumnType("char(36)");
-
-                            b1.Property<string>("Address")
-                                .HasColumnType("longtext");
-
-                            b1.Property<DateTime>("BirthDate")
-                                .HasColumnType("datetime(6)");
-
-                            b1.Property<string>("Country")
-                                .HasColumnType("longtext");
-
-                            b1.Property<string>("Forename")
-                                .HasColumnType("longtext");
-
-                            b1.Property<int>("Gender")
-                                .HasColumnType("int");
-
-                            b1.Property<string>("MailAddress")
-                                .HasColumnType("longtext");
-
-                            b1.Property<string>("Name")
-                                .HasColumnType("longtext");
-
-                            b1.Property<string>("Notes")
-                                .HasColumnType("longtext");
-
-                            b1.Property<string>("Phone")
-                                .HasColumnType("longtext");
-
-                            b1.HasKey("UserAccountID");
-
-                            b1.ToTable("user_accounts");
-
-                            b1.WithOwner()
-                                .HasForeignKey("UserAccountID");
-                        });
-
                     b.Navigation("LoginDetails");
-
-                    b.Navigation("PersonDetails");
                 });
 #pragma warning restore 612, 618
         }

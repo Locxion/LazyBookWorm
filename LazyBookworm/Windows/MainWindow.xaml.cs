@@ -8,7 +8,9 @@ using log4net;
 using log4net.Config;
 using MaterialDesignThemes.Wpf;
 using System;
+using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -22,26 +24,32 @@ namespace LazyBookworm.Windows
     {
         private readonly ILog _logger = LogManager.GetLogger(typeof(MainWindow));
 
-        public readonly LazyBookWormContext _context;
-        public readonly UserService UserService;
+        private readonly LazyBookWormContext _context;
+        private readonly UserService _userService;
 
-        public readonly Settings Settings;
+        private readonly Settings _settings;
+
+        private ObservableCollection<UserAccount> _userAccounts = new();
 
         public MainWindow()
         {
             // Initialize Database Context
             _context = new LazyBookWormContextDesignFactory().CreateDbContext(null);
             // Initialize Services
-            UserService = new UserService(_context);
+            _userService = new UserService(_context);
 
             SetupLogger();
 
             //Load Settings
-            Settings = SettingsService.LoadSettings();
+            _settings = SettingsService.LoadSettings();
 
             _logger.Info($"Start Program - Version: {typeof(MainWindow).Assembly.GetName().Version}");
 
             InitializeComponent();
+
+            // Initialize Item Sources
+            UserAccounts_DataGrid.ItemsSource = _userAccounts;
+
             ParseSettingsToUi();
         }
 
@@ -52,7 +60,7 @@ namespace LazyBookworm.Windows
         private void SaveSettings_Button_Click(object sender, RoutedEventArgs e)
         {
             ParseSettingsFromUi();
-            if (SettingsService.SaveSettings(Settings))
+            if (SettingsService.SaveSettings(_settings))
             {
                 ShowSnackbar("Settings saved!");
             }
@@ -62,71 +70,83 @@ namespace LazyBookworm.Windows
 
         #region Users Tab
 
-        private async void UserTab_GotFocus(object sender, RoutedEventArgs e)
+        private void UserTab_GotFocus(object sender, RoutedEventArgs e)
         {
-            await RefreshUserList();
+            RefreshUserList();
         }
 
-        private async void AddUser_Button_OnClick(object sender, RoutedEventArgs e)
+        private void AddUser_Button_OnClick(object sender, RoutedEventArgs e)
         {
             //TODO Nullchecks
 
             var loginDetails = new LoginDetails(UserLogin_TextBox.Text, UserPassword_PasswordBox.Password);
-            var personDetails = new Person()
-            {
-                Name = UserName_TextBox.Text,
-                Forename = UserForename_TextBox.Text
-            };
+
             var newUser = new UserAccount()
             {
                 LoginDetails = loginDetails,
                 AccountCreation = DateTime.UtcNow,
-                PersonDetails = personDetails,
-                LastLogin = DateTime.MinValue,
-                PermissionLevel = Enum.Parse<PermissionLevel>(UserPermissions_Combobox.SelectedItem.ToString())
+                LastLogin = null,
+                PermissionLevel = Enum.Parse<PermissionLevel>(UserPermissions_Combobox.Text),
+                Name = UserName_TextBox.Text,
+                Forename = UserForename_TextBox.Text,
+                Gender = Enum.Parse<Gender>(UserGender_Combobox.Text),
+                BirthDate = UserBirthDay_DatePicker.DisplayDate,
+                Address = UserAddress_TextBox.Text,
+                Country = UserCountry_TextBox.Text,
+                MailAddress = UserEmail_TextBox.Text,
+                Phone = UserPhone_TextBox.Text,
+                Notes = UserNotes_TextBox.Text
             };
-
-            if (await UserService.CreateUserAsync(newUser) > 0)
+            var createResult = _userService.CreateUserAsync(newUser);
+            if (!createResult.IsSuccess)
             {
-                ShowSnackbar("User Created!");
+                ShowSnackbar(createResult.Message);
+            }
+            else
+            {
+                ShowSnackbar("User was created!");
+                DialogHost.Close("CreateUser_DialogHost");
             }
 
-            await RefreshUserList();
+            RefreshUserList();
         }
 
-        private async Task RefreshUserList()
+        private void RefreshUserList()
         {
-            Users_Listview.Items.Clear();
-            var users = await UserService.GetAllAsync();
-            Users_Listview.ItemsSource = users;
+            UserAccounts_DataGrid.ItemsSource = _userService.GetAll().Select(x => new { x.Name, x.Forename, x.AccountCreation, x.PermissionLevel, x.MailAddress, x.IsSuspended, x.LastLogin });
         }
 
-        private async void DeleteUser_Button_Click(object sender, RoutedEventArgs e)
+        private void DeleteUser_Button_Click(object sender, RoutedEventArgs e)
         {
-            if (Users_Listview.SelectedItem == null)
+            if (UserAccounts_DataGrid.SelectedItem == null)
             {
                 ShowSnackbar("Please select a User from the List!");
                 return;
             }
 
-            var selectedIndex = Users_Listview.SelectedIndex;
-            var users = await UserService.GetAllAsync();
+            var selectedIndex = UserAccounts_DataGrid.SelectedIndex;
+            var users = _userService.GetAll();
 
             var selectedUser = users[selectedIndex];
 
             bool? result =
                 new MessageBoxCustom(
-                    $"Do you really want to Delete the User {selectedUser.PersonDetails.Name}, {selectedUser.PersonDetails.Forename} - {selectedUser.PermissionLevel}",
+                    $"Do you really want to Delete the User {selectedUser.Name}, {selectedUser.Forename} - {selectedUser.PermissionLevel}",
                     MessageType.Confirmation, MessageButtons.YesNo).ShowDialog();
             if (result == null || !result.Value)
             {
                 return;
             }
 
-            if (await UserService.DeleteUserAsync(selectedUser) > 0)
+            var deleteResult = _userService.DeleteUserAsync(selectedUser);
+            if (!deleteResult.IsSuccess)
             {
-                ShowSnackbar("User was deleted.");
-                await RefreshUserList();
+                ShowSnackbar(deleteResult.Message);
+                RefreshUserList();
+            }
+            else
+            {
+                ShowSnackbar("User was deleted!");
             }
         }
 
@@ -190,10 +210,10 @@ namespace LazyBookworm.Windows
         /// </summary>
         private void ParseSettingsFromUi()
         {
-            Settings.DatabaseSettings.DatabaseHost = ServerAdress_TextBox.Text;
-            Settings.DatabaseSettings.DatabaseName = DatabseName_TextBox.Text;
-            Settings.DatabaseSettings.DatabaseUser = DatabseUser_TextBox.Text;
-            Settings.DatabaseSettings.DatabasePassword = DatabasePassword_PasswordBox.Password;
+            _settings.DatabaseSettings.DatabaseHost = ServerAdress_TextBox.Text;
+            _settings.DatabaseSettings.DatabaseName = DatabseName_TextBox.Text;
+            _settings.DatabaseSettings.DatabaseUser = DatabseUser_TextBox.Text;
+            _settings.DatabaseSettings.DatabasePassword = DatabasePassword_PasswordBox.Password;
         }
 
         /// <summary>
@@ -202,10 +222,10 @@ namespace LazyBookworm.Windows
         /// </summary>
         private void ParseSettingsToUi()
         {
-            ServerAdress_TextBox.Text = Settings.DatabaseSettings.DatabaseHost;
-            DatabseName_TextBox.Text = Settings.DatabaseSettings.DatabaseName;
-            DatabseUser_TextBox.Text = Settings.DatabaseSettings.DatabaseUser;
-            DatabasePassword_PasswordBox.Password = Settings.DatabaseSettings.DatabasePassword;
+            ServerAdress_TextBox.Text = _settings.DatabaseSettings.DatabaseHost;
+            DatabseName_TextBox.Text = _settings.DatabaseSettings.DatabaseName;
+            DatabseUser_TextBox.Text = _settings.DatabaseSettings.DatabaseUser;
+            DatabasePassword_PasswordBox.Password = _settings.DatabaseSettings.DatabasePassword;
         }
 
         #endregion Methods
