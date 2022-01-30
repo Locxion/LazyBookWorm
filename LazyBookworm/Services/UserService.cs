@@ -40,9 +40,28 @@ namespace LazyBookworm.Services
         }
 
         /// <summary>
+        /// Searches the Database for LoginDetails.Username
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns>UserAccount or Null if nonexistent</returns>
+        public UserAccount GetUserAccountByLogin(string username)
+        {
+            var userAccounts = GetAll();
+            foreach (var userAccount in userAccounts)
+            {
+                if (userAccount.LoginDetails.Username.ToLower() == username.ToLower())
+                {
+                    return userAccount;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// Gets all UserAccounts from Database
         /// </summary>
-        /// <returns></returns>
+        /// <returns>List with all UserAccounts in Database</returns>
         public List<UserAccount> GetAll()
         {
             return _context.Accounts.AsQueryable().ToList();

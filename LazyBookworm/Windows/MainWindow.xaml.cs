@@ -14,6 +14,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace LazyBookworm.Windows
 {
@@ -77,8 +78,6 @@ namespace LazyBookworm.Windows
 
         private void AddUser_Button_OnClick(object sender, RoutedEventArgs e)
         {
-            //TODO Nullchecks
-
             var loginDetails = new LoginDetails(UserLogin_TextBox.Text, UserPassword_PasswordBox.Password);
 
             var newUser = new UserAccount()
@@ -97,6 +96,13 @@ namespace LazyBookworm.Windows
                 Phone = UserPhone_TextBox.Text,
                 Notes = UserNotes_TextBox.Text
             };
+
+            if (!CheckInputForNewUser(newUser))
+            {
+                _logger.Warn("Could not create new User. Input Values wrong or missing!");
+                return;
+            }
+
             var createResult = _userService.CreateUserAsync(newUser);
             if (!createResult.IsSuccess)
             {
@@ -113,7 +119,7 @@ namespace LazyBookworm.Windows
 
         private void RefreshUserList()
         {
-            UserAccounts_DataGrid.ItemsSource = _userService.GetAll().Select(x => new { x.Name, x.Forename, x.AccountCreation, x.PermissionLevel, x.MailAddress, x.IsSuspended, x.LastLogin });
+            UserAccounts_DataGrid.ItemsSource = _userService.GetAll().Select(x => new { x.LoginDetails.Username, x.Name, x.Forename, x.AccountCreation, x.PermissionLevel, x.MailAddress, x.IsSuspended, x.LastLogin });
         }
 
         private void DeleteUser_Button_Click(object sender, RoutedEventArgs e)
@@ -228,6 +234,30 @@ namespace LazyBookworm.Windows
             DatabasePassword_PasswordBox.Password = _settings.DatabaseSettings.DatabasePassword;
         }
 
+        /// <summary>
+        /// Checks required Values like existing Login or valid Email Adress
+        /// </summary>
+        /// <param name="newUser"></param>
+        /// <returns></returns>
+        private bool CheckInputForNewUser(UserAccount userAccount)
+        {
+            // Check for existing LoginName in Databse
+            var existingUserAccount = _userService.GetUserAccountByLogin(userAccount.LoginDetails.Username);
+            if (existingUserAccount != null)
+            {
+                HintAssist.SetHelperText(UserLogin_TextBox, "Username already taken!");
+                return false;
+            }
+
+            if (!IsValidEmail(userAccount.MailAddress))
+            {
+                HintAssist.SetHelperText(UserEmail_TextBox, "Email not valid!");
+                return false;
+            }
+
+            return true;
+        }
+
         #endregion Methods
 
         #region Helper
@@ -254,6 +284,25 @@ namespace LazyBookworm.Windows
                 _logger.Error($"Exception terminated Program: {args.IsTerminating}");
                 _logger.Error(args.ExceptionObject);
             };
+        }
+
+        public bool IsValidEmail(string email)
+        {
+            var trimmedEmail = email.Trim();
+
+            if (trimmedEmail.EndsWith("."))
+            {
+                return false; // suggested by @TK-421
+            }
+            try
+            {
+                var addr = new System.Net.Mail.MailAddress(email);
+                return addr.Address == trimmedEmail;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         #endregion Helper
