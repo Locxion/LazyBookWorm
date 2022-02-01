@@ -23,19 +23,19 @@ namespace LazyBookworm.Services
         /// </summary>
         /// <param name="userAccount"></param>
         /// <returns></returns>
-        public ActionResult CreateUserAsync(UserAccount userAccount)
+        public ActionResult<UserAccount> CreateUserAsync(UserAccount userAccount)
         {
             _context.Accounts.Add(userAccount);
             try
             {
                 _context.SaveChanges();
 
-                return ActionResult.Success();
+                return ActionResult<UserAccount>.Success(userAccount);
             }
             catch (Exception e)
             {
                 _logger.Error(e);
-                return ActionResult.SystemError("There was an Database Error!", $"{e.Message}: {e.InnerException?.Message}");
+                return ActionResult<UserAccount>.SystemError("There was an Database Error!", $"{e.Message}: {e.InnerException?.Message}");
             }
         }
 
@@ -53,7 +53,7 @@ namespace LazyBookworm.Services
         /// </summary>
         /// <param name="userAccount"></param>
         /// <returns></returns>
-        public ActionResult DeleteUserAsync(UserAccount userAccount)
+        public ActionResult<UserAccount> DeleteUserAsync(UserAccount userAccount)
         {
             _context.Accounts.Remove(userAccount);
 
@@ -61,12 +61,12 @@ namespace LazyBookworm.Services
             {
                 _context.SaveChanges();
 
-                return ActionResult.Success();
+                return ActionResult<UserAccount>.Success(userAccount);
             }
             catch (Exception e)
             {
                 _logger.Error(e);
-                return ActionResult.SystemError("There was an Database Error!", $"{e.Message}: {e.InnerException?.Message}");
+                return ActionResult<UserAccount>.SystemError("There was an Database Error!", $"{e.Message}: {e.InnerException?.Message}");
             }
         }
 
@@ -75,23 +75,23 @@ namespace LazyBookworm.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public ActionResult DeleteUserA(Guid id)
+        public ActionResult<UserAccount> DeleteUserA(Guid id)
         {
             var account = GetAccount(id);
             if (account == null)
-                return ActionResult.Error("User Account not found!");
+                return ActionResult<UserAccount>.Error("User Account not found!");
             _context.Accounts.Remove(account);
 
             try
             {
                 _context.SaveChanges();
 
-                return ActionResult.Success();
+                return ActionResult<UserAccount>.Success(account);
             }
             catch (Exception e)
             {
                 _logger.Error(e);
-                return ActionResult.SystemError("There was an Database Error!", $"{e.Message}: {e.InnerException?.Message}");
+                return ActionResult<UserAccount>.SystemError("There was an Database Error!", $"{e.Message}: {e.InnerException?.Message}");
             }
         }
 
