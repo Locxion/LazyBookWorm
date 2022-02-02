@@ -8,11 +8,13 @@ using log4net;
 using log4net.Config;
 using MaterialDesignThemes.Wpf;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -30,7 +32,7 @@ namespace LazyBookworm.Windows
 
         private readonly Settings _settings;
 
-        private ObservableCollection<UserAccount> _userAccounts = new();
+        private List<UserAccount> _userAccounts;
 
         public MainWindow()
         {
@@ -47,9 +49,6 @@ namespace LazyBookworm.Windows
             _logger.Info($"Start Program - Version: {typeof(MainWindow).Assembly.GetName().Version}");
 
             InitializeComponent();
-
-            // Initialize Item Sources
-            UserAccounts_DataGrid.ItemsSource = _userAccounts;
 
             ParseSettingsToUi();
         }
@@ -74,6 +73,39 @@ namespace LazyBookworm.Windows
         private void UserTab_GotFocus(object sender, RoutedEventArgs e)
         {
             RefreshUserList();
+        }
+
+        private void SearchUserAccounts_TextBox_OnTextChanged(object sender, TextChangedEventArgs e)
+        {
+            var input = SearchUserAccounts_TextBox.Text.ToLower();
+            if (!string.IsNullOrWhiteSpace(input))
+            {
+                var output = _userAccounts.Where(x => x.LoginDetails.Username.Contains(input) ||
+                                                      x.Name.Contains(input) ||
+                                                      x.Forename.Contains(input) ||
+                                                      x.MailAddress.Contains(input) ||
+                                                      x.BirthDate.ToLongDateString().ToString().Contains(input) ||
+                                                      x.Address.Contains(input) ||
+                                                      x.Country.Contains(input) ||
+                                                      x.Phone.Contains(input))
+                    .Select(x => new
+                    {
+                        x.IsSelected,
+                        x.LoginDetails.Username,
+                        x.Name,
+                        x.Forename,
+                        x.AccountCreation,
+                        x.PermissionLevel,
+                        x.MailAddress,
+                        x.IsSuspended,
+                        x.LastLogin
+                    }).ToList();
+                UserAccounts_DataGrid.ItemsSource = output;
+            }
+            else
+            {
+                RefreshUserList();
+            }
         }
 
         private void AddUser_Button_OnClick(object sender, RoutedEventArgs e)
@@ -119,7 +151,9 @@ namespace LazyBookworm.Windows
 
         private void RefreshUserList()
         {
-            UserAccounts_DataGrid.ItemsSource = _userService.GetAll().Select(x => new { x.LoginDetails.Username, x.Name, x.Forename, x.AccountCreation, x.PermissionLevel, x.MailAddress, x.IsSuspended, x.LastLogin });
+            _userAccounts = _userService.GetAll();
+
+            UserAccounts_DataGrid.ItemsSource = _userAccounts.Select(x => new { x.IsSelected, x.LoginDetails.Username, x.Name, x.Forename, x.AccountCreation, x.PermissionLevel, x.MailAddress, x.IsSuspended, x.LastLogin });
         }
 
         private void DeleteUser_Button_Click(object sender, RoutedEventArgs e)
@@ -148,12 +182,65 @@ namespace LazyBookworm.Windows
             if (!deleteResult.IsSuccess)
             {
                 ShowSnackbar(deleteResult.Message);
-                RefreshUserList();
             }
             else
             {
                 ShowSnackbar("User was deleted!");
+                RefreshUserList();
             }
+        }
+
+        private void PasswordInputChanged(object sender, RoutedEventArgs e)
+        {
+            bool passwordsMatch = CheckPasswords(UserPassword_PasswordBox.Password, UserPasswordConfirm_PasswordBox.Password);
+            if (!passwordsMatch)
+            {
+                HintAssist.SetHelperText(UserPasswordConfirm_PasswordBox, "Passwords don't match!");
+                UserPassword_PasswordBox.Foreground = Brushes.Red;
+                UserPasswordConfirm_PasswordBox.Foreground = Brushes.Red;
+            }
+            else
+            {
+                HintAssist.SetHelperText(UserPasswordConfirm_PasswordBox, "");
+                UserPassword_PasswordBox.Foreground = Brushes.Black;
+                UserPasswordConfirm_PasswordBox.Foreground = Brushes.Black;
+            }
+        }
+
+        private void UserEmail_TextBox_OnTextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (!IsValidEmail(UserEmail_TextBox.Text))
+            {
+                HintAssist.SetHelperText(UserEmail_TextBox, "Email not valid!");
+                UserEmail_TextBox.Foreground = Brushes.Red;
+            }
+            else
+            {
+                HintAssist.SetHelperText(UserEmail_TextBox, "");
+                UserEmail_TextBox.Foreground = Brushes.Black;
+            }
+        }
+
+        /// <summary>
+        /// Clears all the Control Values of CreateUser DialogHost
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="eventargs"></param>
+        private void CreateUser_DialogHost_OnDialogOpened(object sender, DialogOpenedEventArgs eventargs)
+        {
+            UserLogin_TextBox.Clear();
+            UserPassword_PasswordBox.Clear();
+            UserPasswordConfirm_PasswordBox.Clear();
+            UserName_TextBox.Clear();
+            UserForename_TextBox.Clear();
+            UserPermissions_Combobox.SelectedIndex = 0;
+            UserEmail_TextBox.Clear();
+            UserAddress_TextBox.Clear();
+            UserGender_Combobox.SelectedIndex = 0;
+            UserBirthDay_DatePicker.SelectedDate = DateTime.UtcNow;
+            UserNotes_TextBox.Clear();
+            UserPhone_TextBox.Clear();
+            UserCountry_TextBox.Clear();
         }
 
         #endregion Users Tab
@@ -237,7 +324,7 @@ namespace LazyBookworm.Windows
         /// <summary>
         /// Checks required Values like existing Login or valid Email Adress
         /// </summary>
-        /// <param name="newUser"></param>
+        /// <param name="userAccount"></param>
         /// <returns></returns>
         private bool CheckInputForNewUser(UserAccount userAccount)
         {
@@ -246,14 +333,23 @@ namespace LazyBookworm.Windows
             if (existingUserAccount != null)
             {
                 HintAssist.SetHelperText(UserLogin_TextBox, "Username already taken!");
+                UserLogin_TextBox.Foreground = Brushes.Red;
                 return false;
             }
+
+            HintAssist.SetHelperText(UserLogin_TextBox, "");
+            UserLogin_TextBox.Foreground = Brushes.Black;
 
             if (!IsValidEmail(userAccount.MailAddress))
             {
                 HintAssist.SetHelperText(UserEmail_TextBox, "Email not valid!");
+                UserEmail_TextBox.Foreground = Brushes.Red;
+
                 return false;
             }
+
+            HintAssist.SetHelperText(UserEmail_TextBox, "");
+            UserEmail_TextBox.Foreground = Brushes.Black;
 
             return true;
         }
@@ -303,6 +399,11 @@ namespace LazyBookworm.Windows
             {
                 return false;
             }
+        }
+
+        private bool CheckPasswords(string password1, string password2)
+        {
+            return password1 == password2;
         }
 
         #endregion Helper

@@ -6,6 +6,7 @@ namespace LazyBookworm.Common.Models
 {
     public class UserAccount : Person
     {
+        public bool IsSelected { get; set; } = false;
         public Guid ID { get; set; }
         public LoginDetails LoginDetails { get; set; }
         public DateTime? LastLogin { get; set; }

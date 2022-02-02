@@ -27,6 +27,8 @@ namespace LazyBookworm.Database.Configurations
             builder.Property(x => x.MailAddress).IsRequired();
             builder.Property(x => x.Phone).IsRequired();
             builder.Property(x => x.Notes).IsRequired();
+
+            builder.Ignore(x => x.IsSelected);
         }
     }
 }
