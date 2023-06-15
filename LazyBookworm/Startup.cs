@@ -1,6 +1,8 @@
 using Blazorise;
 using Blazorise.Icons.FontAwesome;
 using Blazorise.Tailwind;
+using LazyBookworm.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace LazyBookworm
 {
@@ -10,9 +12,19 @@ namespace LazyBookworm
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+#if DEBUG
+                .AddJsonFile("appsettings.Development.json")
+#endif
+#if RELEASE
+                .AddJsonFile("appsettings.json")
+#endif
+                .Build();
+            
             services.AddRazorPages();
             services.AddServerSideBlazor();
-
+            //services.AddDbContext<LazybookwormContext>(options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
             services.AddServerSideBlazor().AddHubOptions((o) =>
             {
                 o.MaximumReceiveMessageSize = 1024 * 1024 * 100;
